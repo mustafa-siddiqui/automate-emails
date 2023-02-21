@@ -79,3 +79,4 @@ Sample `email-info.json`:
 - [ ] Make `requirements.txt` for module dependencies
 - [ ] Add logger for logging
 - [ ] Create helper scripts to generate `.json` files
+- [ ] Make text replacements generic/editable by the user
