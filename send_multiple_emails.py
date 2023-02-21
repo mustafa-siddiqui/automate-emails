@@ -26,12 +26,18 @@ def main():
     parser.add_argument(
         "-r",
         "--recipients_file",
-        help="A document containing a list of emails and names of recipients. Currently supporting .cvs files.",
+        help="A document containing a list of emails and names of recipients. Currently supporting .csv files.",
         type=str,
         required=True,
     )
 
-    parser.add_argument("-v", "--volunteer", type=str, required=False)
+    parser.add_argument(
+        "-v",
+        "--volunteer",
+        help="Name of person responsible for group of recipients in the data.",
+        type=str,
+        required=False,
+    )
 
     args = parser.parse_args()
 
