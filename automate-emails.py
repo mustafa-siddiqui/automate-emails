@@ -86,9 +86,9 @@ class SenderInfo:
 # Function Definitions
 #
 
-def validate_email(email: str) -> bool:
-    """Performs a basic check to see if the email provided is in a valid format. Does not 
-    validate if the email address actually exists or not."""
+def _validate_email(email: str) -> bool:
+    """Helper function that performs a basic check to see if the email provided is in a valid 
+    format. Does not validate if the email address actually exists or not."""
 
     if not EMAIL_REGEX.match(email):
         return False
@@ -103,7 +103,7 @@ def get_sender_info(sender_info_file: str) -> SenderInfo:
     sender_info = json.load(file)
     file.close()
 
-    if not validate_email(sender_info["email"]):
+    if not _validate_email(sender_info["email"]):
         return None
 
     return SenderInfo(sender_info)
@@ -112,8 +112,8 @@ def read_data_file(data_file: str) -> dict:
     """Parses through .csv data file and creates a dictionary of recipients' names with their
     email addresses."""
 
-def parse_email_template(template_html_text: str, sender_info: SenderInfo) -> str:
-    """Parses through the email's body in HTML format and returns a string representation 
+def _parse_email_template(template_html_text: str, sender_info: SenderInfo) -> str:
+    """Helper function that parses through the email's body in HTML format and returns a string representation 
     containing the sender's name and class year."""
 
     template_modified = template_html_text.replace(REPLACE_WITH_NAME_MATCHER, sender_info.name)
@@ -129,7 +129,7 @@ def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
     file.close()
 
     email_info_obj = EmailInfo(email_info)
-    email_info_obj.body = parse_email_template(email_info_obj.body, sender_info)
+    email_info_obj.body = _parse_email_template(email_info_obj.body, sender_info)
 
     return email_info_obj
 
@@ -161,14 +161,19 @@ def disconnect_from_smtp_server(smtp_server_obj: smtplib.SMTP) -> None:
     smtp_server_obj.quit()
 
 
-def send_email(smtp_server_obj: smtplib.SMTP, sender_email: str, user_details: SenderInfo, email_text: str) -> None:
-    """Send email to one recipient given the sender info and email body in html."""
+def send_email(smtp_server_obj: smtplib.SMTP, sender_info: SenderInfo, email_info: EmailInfo, recipient_email: str) -> None:
+    """Send email to one recipient given the sender info and email info. Assumes the recipient email is validated."""
 
     message = MIMEMultipart("alternative")
 
-    message["Subject"] = "Test Message"
-    message["From"] = "mustafa.eins@gmail.com"
-    message["To"] = "msiddiq7@u.rochester.edu"
+    message["Subject"] = email_info.subject
+    message["From"] = sender_info.email
+    message["To"] = recipient_email
+
+    email_body_text = MIMEText(email_info.body, 'html')
+    message.attach(email_body_text)
+
+    smtp_server_obj.sendmail(sender_info.email, recipient_email, message.as_string())
 
 #
 # MAIN
@@ -195,18 +200,26 @@ def main():
     )
 
     parser.parse_args()
+
+    sender_info = get_sender_info(SENDER_INFO_JSON_FILE)
+    if sender_info is None:
+        print("Error: sender email not valid. Check sender-info.json")
+        exit()
+
+    email_info = get_email_info(EMAIL_INFO_JSON_FILE, sender_info)
+
+    smtp_server = connect_to_smtp_server(sender_info)
+    if smtp_server is None:
+        print("Error: cannot connect to SMTP server.")
+        exit()
+
+    recipient_email = "msiddiq7@u.rochester.edu"
+    send_email(smtp_server, sender_info, email_info, recipient_email)
+
+    disconnect_from_smtp_server(smtp_server)
+
     
-    # test code
-    if get_sender_info(SENDER_INFO_JSON_FILE) is not None:
-        print("Success")
-    else:
-        print("You suck.")
     
-    if get_email_info(EMAIL_INFO_JSON_FILE, get_sender_info(SENDER_INFO_JSON_FILE)) is not None:
-        print("Success x2")
-        print(get_email_info(EMAIL_INFO_JSON_FILE, get_sender_info(SENDER_INFO_JSON_FILE)).subject)
-    else:
-        print("You suck. x2")
 
 
 if __name__ == "__main__":
