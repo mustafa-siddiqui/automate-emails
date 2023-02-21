@@ -15,6 +15,31 @@ SMTP_SERVER_PORT = 587
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 #
+# Classes
+#
+
+class SenderInfo:
+    """Class to store validated sender info."""
+
+    def __init__(self, sender_info_json_obj) -> None:
+        """Class constructor."""
+
+        self.name = sender_info_json_obj["name"]
+        self.class_year = sender_info_json_obj["class-year"]
+        self.email = sender_info_json_obj["email"]
+        self.app_password = sender_info_json_obj["app-password"]
+
+    def __str__(self) -> str:
+        """Returns a string representation of the object excluding the app password."""
+
+        str_repr = ""
+        str_repr += "{Name: " + self.name + ", "
+        str_repr += "Class Year: " + self.class_year + ", "
+        str_repr += "Email: " + self.email + "}"
+
+        return str_repr
+        
+#
 # Function Definitions
 #
 
@@ -33,6 +58,8 @@ def get_sender_info(sender_info_file: str) -> dict:
     file = open("sender-info.json", "r")
     sender_info = json.load(file)
     file.close()
+
+    
 
     return sender_info
 
