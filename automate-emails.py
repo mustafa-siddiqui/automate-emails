@@ -98,14 +98,6 @@ def parse_email_template(email_template: str, sender_info: SenderInfo) -> str:
     return email_body_html_text
 
 
-def substitute_names_and_create_individual_files(
-    user_details: dict, template: str
-) -> bool:
-    """Goes through the user info dictionary and creates individual text files for each user with the
-    substituted text. Returns true if no errors encountered, false if otherwise.
-    """
-
-
 def send_email(sender_email: str, user_details: SenderInfo, email_text: str) -> None:
     """Send email to one recipient given the sender info and email body in html."""
 
