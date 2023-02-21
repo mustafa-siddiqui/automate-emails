@@ -33,6 +33,7 @@ REPLACE_WITH_CLASS_YEAR_MATCHER = "[<span style='color:red'>Year</span>]"
 # Classes
 #
 
+
 class EmailInfo:
     """Class to store email subject and body text."""
 
@@ -55,6 +56,7 @@ class EmailInfo:
         str_repr += "Body: " + self.body + "}"
 
         return str_repr
+
 
 class SenderInfo:
     """Class to store validated sender info."""
@@ -82,18 +84,21 @@ class SenderInfo:
 
         return str_repr
 
+
 #
 # Function Definitions
 #
 
+
 def _validate_email(email: str) -> bool:
-    """Helper function that performs a basic check to see if the email provided is in a valid 
+    """Helper function that performs a basic check to see if the email provided is in a valid
     format. Does not validate if the email address actually exists or not."""
 
     if not EMAIL_REGEX.match(email):
         return False
 
     return True
+
 
 def get_sender_info(sender_info_file: str) -> SenderInfo:
     """Reads sender info json file, validates email address, and returns a SenderInfo object.
@@ -108,18 +113,25 @@ def get_sender_info(sender_info_file: str) -> SenderInfo:
 
     return SenderInfo(sender_info)
 
+
 def read_data_file(data_file: str) -> dict:
     """Parses through .csv data file and creates a dictionary of recipients' names with their
     email addresses."""
 
+
 def _parse_email_template(template_html_text: str, sender_info: SenderInfo) -> str:
-    """Helper function that parses through the email's body in HTML format and returns a string representation 
+    """Helper function that parses through the email's body in HTML format and returns a string representation
     containing the sender's name and class year."""
 
-    template_modified = template_html_text.replace(REPLACE_WITH_NAME_MATCHER, sender_info.name)
-    email_body_html_text = template_modified.replace(REPLACE_WITH_CLASS_YEAR_MATCHER, sender_info.class_year)
+    template_modified = template_html_text.replace(
+        REPLACE_WITH_NAME_MATCHER, sender_info.name
+    )
+    email_body_html_text = template_modified.replace(
+        REPLACE_WITH_CLASS_YEAR_MATCHER, sender_info.class_year
+    )
 
     return email_body_html_text
+
 
 def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
     """Reads email info json file and returns a EmailInfo object with matchers replaced with sender's info."""
@@ -133,9 +145,10 @@ def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
 
     return email_info_obj
 
+
 def connect_to_smtp_server(sender_info: SenderInfo) -> smtplib.SMTP:
     """Connects to the SMTP server given the server domain name, port info, and sender login details.
-    Returns an SMTP object if successful, None if not. """
+    Returns an SMTP object if successful, None if not."""
 
     # connect to the server
     try:
@@ -150,10 +163,15 @@ def connect_to_smtp_server(sender_info: SenderInfo) -> smtplib.SMTP:
     try:
         smtp_server_obj.login(sender_info.email, sender_info.app_password)
     except smtplib.SMTPAuthenticationError as error:
-        print("Error: cannot login to SMPT server. Check your login credentials. {" + str(error) + "}")
+        print(
+            "Error: cannot login to SMPT server. Check your login credentials. {"
+            + str(error)
+            + "}"
+        )
         return None
 
     return smtp_server_obj
+
 
 def disconnect_from_smtp_server(smtp_server_obj: smtplib.SMTP) -> None:
     """Disconnects from the SMTP server."""
@@ -161,8 +179,14 @@ def disconnect_from_smtp_server(smtp_server_obj: smtplib.SMTP) -> None:
     smtp_server_obj.quit()
 
 
-def send_email(smtp_server_obj: smtplib.SMTP, sender_info: SenderInfo, email_info: EmailInfo, recipient_email: str) -> None:
-    """Send email to one recipient given the sender info and email info. Assumes the recipient email is validated."""
+def send_email(
+    smtp_server_obj: smtplib.SMTP,
+    sender_info: SenderInfo,
+    email_info: EmailInfo,
+    recipient_email: str,
+) -> None:
+    """Send email to one recipient given the sender info and email info. 
+    Assumes the recipient email is validated."""
 
     message = MIMEMultipart("alternative")
 
@@ -170,36 +194,37 @@ def send_email(smtp_server_obj: smtplib.SMTP, sender_info: SenderInfo, email_inf
     message["From"] = sender_info.email
     message["To"] = recipient_email
 
-    email_body_text = MIMEText(email_info.body, 'html')
+    email_body_text = MIMEText(email_info.body, "html")
     message.attach(email_body_text)
 
     smtp_server_obj.sendmail(sender_info.email, recipient_email, message.as_string())
 
+
 #
-# MAIN
+# Main
 #
+
 
 def main():
     parser = argparse.ArgumentParser(
-        description="""Parses through email data of recipients and sends emails based on provided 
-        email template."""
+        description="""Sends email based on the given email info and the sender's info to a recipient."""
     )
 
     parser.add_argument(
-        "--email_template",
-        help="""A text file containing the email template.""",
+        "-r",
+        "--recipient_email",
+        help="""Recipient's email address.""",
         type=str,
         required=True,
     )
 
-    parser.add_argument(
-        "--data_file",
-        help="""A .csv file containing receipients' name and email data.""",
-        type=str,
-        required=True,
-    )
+    args = parser.parse_args()
 
-    parser.parse_args()
+    if not _validate_email(args.recipient_email):
+        print("Error: Invalid email address for recipient.")
+        exit()
+
+    recipient_email = args.recipient_email
 
     sender_info = get_sender_info(SENDER_INFO_JSON_FILE)
     if sender_info is None:
@@ -213,13 +238,9 @@ def main():
         print("Error: cannot connect to SMTP server.")
         exit()
 
-    recipient_email = "msiddiq7@u.rochester.edu"
     send_email(smtp_server, sender_info, email_info, recipient_email)
 
     disconnect_from_smtp_server(smtp_server)
-
-    
-    
 
 
 if __name__ == "__main__":
