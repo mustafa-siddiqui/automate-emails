@@ -10,6 +10,7 @@ This current implementation is written for a specific case of sending emails to 
 This repo stores sender's credential information and email data in untracked `.json` files -- `sender-info.json` and `email-info.json`. Templates for those files have been provided in this repo as `sender-info-template.json` and `email-info-template.json`. You can either rename these files after cloning or make new ones with the required info.
 
 `send_email.py`:
+
 Usage:
 ```bash
 usage: send_email.py [-h] -r RECIPIENT_EMAIL
@@ -24,6 +25,7 @@ optional arguments:
 This script parses through the email template and sends an email to the specified recipient address.
 
 `send_multiple_emails.py`:
+
 Usage:
 ```bash
 usage: send_multiple_emails.py [-h] -r RECIPIENTS_FILE [-v VOLUNTEER]
@@ -61,6 +63,7 @@ Sample `sender-info.json`:
 ```
 
 `email-info.json`:
+
 Stores the email subject and body. The body is the filepath to a `.html` file containing the email text body. It is `.html` so that rich formatting can be supported. Write your email as you wish in MS Word or Google Docs and save it as a `.html` file. All fields in this file are strings.
 
 Sample `email-info.json`:
