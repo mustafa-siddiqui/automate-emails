@@ -3,6 +3,7 @@ import csv
 import json
 import re
 import smtplib
+import sys
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -185,7 +186,7 @@ def send_email(
     email_info: EmailInfo,
     recipient_email: str,
 ) -> None:
-    """Send email to one recipient given the sender info and email info. 
+    """Send email to one recipient given the sender info and email info.
     Assumes the recipient email is validated."""
 
     message = MIMEMultipart("alternative")
@@ -205,7 +206,7 @@ def send_email(
 #
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(
         description="""Sends email based on the given email info and the sender's info to a recipient."""
     )
@@ -218,7 +219,7 @@ def main():
         required=True,
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     if not _validate_email(args.recipient_email):
         print("Error: Invalid email address for recipient.")
@@ -244,4 +245,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
