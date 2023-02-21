@@ -17,6 +17,13 @@ EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 # sender info json file path respective to this file
 SENDER_INFO_JSON_FILE = "sender-info.json"
 
+# email template html file path respective to this file
+EMAIL_TEMPLATE_FILE = "email-template.html"
+
+# text to find in template and replace with sender info
+REPLACE_WITH_NAME_MATCHER = "[<span style='color:red'>Sender name</span>]"
+REPLACE_WITH_CLASS_YEAR_MATCHER = "[<span style='color:red'>Year</span>]"
+
 #
 # Classes
 #
@@ -25,7 +32,12 @@ class SenderInfo:
     """Class to store validated sender info."""
 
     def __init__(self, sender_info_json_obj) -> None:
-        """Class constructor."""
+        """Class constructor.
+        name: str
+        class_year: str
+        email: str
+        app_password: str
+        """
 
         self.name = sender_info_json_obj["name"]
         self.class_year = sender_info_json_obj["class-year"]
@@ -72,15 +84,18 @@ def read_data_file(data_file: str) -> dict:
     """Parses through .csv data file and creates a dictionary of recipients' names with their
     email addresses."""
 
-def read_email_template(email_template: str) -> str:
+def parse_email_template(email_template: str, sender_info: SenderInfo) -> str:
     """Opens and processes email template from MS Word file format to extract text and return 
-    a string representation."""
+    a string representation containing the sender's name and class year."""
 
     file = open(email_template, "r")
     template_html_text = file.read()
     file.close()
 
-    return template_html_text
+    template_modified = template_html_text.replace(REPLACE_WITH_NAME_MATCHER, sender_info.name)
+    email_body_html_text = template_modified.replace(REPLACE_WITH_CLASS_YEAR_MATCHER, sender_info.class_year)
+
+    return email_body_html_text
 
 
 def substitute_names_and_create_individual_files(
@@ -91,9 +106,8 @@ def substitute_names_and_create_individual_files(
     """
 
 
-def send_emails(sender_email: str, user_details: dict, template: str):
-    """To-Do: Instead of creating individual text files of substituted text, substitute text in place,
-    and send emails directly."""
+def send_email(sender_email: str, user_details: SenderInfo, email_text: str) -> None:
+    """Send email to one recipient given the sender info and email body in html."""
 
 #
 # MAIN
@@ -126,6 +140,8 @@ def main():
         print("Success")
     else:
         print("You suck.")
+    
+    print(parse_email_template(EMAIL_TEMPLATE_FILE, get_sender_info(SENDER_INFO_JSON_FILE)))
 
 
 if __name__ == "__main__":
