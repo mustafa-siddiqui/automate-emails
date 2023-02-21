@@ -14,6 +14,9 @@ SMTP_SERVER_PORT = 587
 # to validate email format
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
+# sender info json file path respective to this file
+SENDER_INFO_JSON_FILE = "sender-info.json"
+
 #
 # Classes
 #
@@ -38,7 +41,7 @@ class SenderInfo:
         str_repr += "Email: " + self.email + "}"
 
         return str_repr
-        
+
 #
 # Function Definitions
 #
@@ -52,16 +55,18 @@ def validate_email(email: str) -> bool:
 
     return True
 
-def get_sender_info(sender_info_file: str) -> dict:
-    """Reads sender-info.json, validates email address, and returns a dictionary of the info."""
+def get_sender_info(sender_info_file: str) -> SenderInfo:
+    """Reads sender info json file, validates email address, and returns a dictionary of the info.
+    Returns None if email not valid."""
 
-    file = open("sender-info.json", "r")
+    file = open(sender_info_file, "r")
     sender_info = json.load(file)
     file.close()
 
-    
+    if not validate_email(sender_info["email"]):
+        return None
 
-    return sender_info
+    return SenderInfo(sender_info)
 
 def read_data_file(data_file: str) -> dict:
     """Parses through .csv data file and creates a dictionary of recipients' names with their
@@ -115,6 +120,12 @@ def main():
     )
 
     parser.parse_args()
+    
+    # test code
+    if get_sender_info(SENDER_INFO_JSON_FILE) is not None:
+        print("Success")
+    else:
+        print("You suck.")
 
 
 if __name__ == "__main__":
