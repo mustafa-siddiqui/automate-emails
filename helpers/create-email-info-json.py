@@ -29,7 +29,7 @@ def main():
         {"subject": args.subject, "body-template-file": args.template_file_path}
     )
 
-    file = open("../email-info.json", "w")
+    file = open("email-info.json", "w")
     file.write(file_content)
     file.close()
 
