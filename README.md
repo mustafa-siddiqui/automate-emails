@@ -4,6 +4,14 @@ Automate emails given a template!
 
 This current implementation is written for a specific case of sending emails to university alumni but with a few changes can be used by anyone as they wish. Currently, the email template has two fields -- [Sender name] and [Year] -- that the script replaces with the sender's name and class year.
 
+# Set Up:
+Use `pip` to install required module(s). Simply run:
+```bash
+pip3 install -r requirements.txt
+```
+
+*See [installing `pip`](https://pip.pypa.io/en/stable/installation/)*.
+
 ## How to Use:
 `python3 send_email.py -h` or `python3 send_multiple_emails.py -h` to see command line options.
 
@@ -76,7 +84,7 @@ Sample `email-info.json`:
 
 
 ## Next Steps:
-- [ ] Make `requirements.txt` for module dependencies
+- [x] Make `requirements.txt` for module dependencies
 - [ ] Add logger for logging
 - [ ] Create helper scripts to generate `.json` files
 - [ ] Make text replacements generic/editable by the user
