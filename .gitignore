@@ -1,4 +1,5 @@
 *.txt
+!requirements.txt
 sender-info.json
 email-info.json
 *.html
