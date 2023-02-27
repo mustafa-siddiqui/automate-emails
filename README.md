@@ -86,5 +86,5 @@ Sample `email-info.json`:
 ## Next Steps:
 - [x] Make `requirements.txt` for module dependencies
 - [ ] Add logger for logging
-- [ ] Create helper scripts to generate `.json` files
+- [x] Create helper scripts to generate `.json` files
 - [ ] Make text replacements generic/editable by the user
