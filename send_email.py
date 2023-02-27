@@ -20,10 +20,10 @@ SMTP_SERVER_PORT = 587
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 # sender info json file path respective to this file
-SENDER_INFO_JSON_FILE = "sender-info.json"
+SENDER_INFO_JSON_FILE = "data/sender-info.json"
 
 # email info json file path respective to this file
-EMAIL_INFO_JSON_FILE = "email-info.json"
+EMAIL_INFO_JSON_FILE = "data/email-info.json"
 
 # text to find in template and replace with sender info
 REPLACE_WITH_NAME_MATCHER = "[<span style='color:red'>Sender name</span>]"
