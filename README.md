@@ -2,7 +2,7 @@
 
 Automate emails given a template!
 
-This current implementation is written for a specific case of sending emails to university alumni but with a few changes can be used by anyone as they wish. Currently, the email template has two fields -- [Sender name] and [Year] -- that the script replaces with the sender's name and class year.
+Send emails to recipient(s) 
 
 # Set Up:
 Use `pip` to install required module(s). Simply run:
@@ -13,15 +13,19 @@ pip3 install -r requirements.txt
 *See [installing `pip`](https://pip.pypa.io/en/stable/installation/)*.
 
 ## How to Use:
-`python3 send_email.py -h` or `python3 send_multiple_emails.py -h` to see command line options.
+`./send_email.py -h` or `./send_multiple_emails.py -h` to see command line options.
 
-This repo stores sender's credential information and email data in untracked `.json` files -- `sender-info.json` and `email-info.json`. Templates for those files have been provided in this repo as `sender-info-template.json` and `email-info-template.json`. You can either rename these files after cloning or make new ones with the required info.
+This repo stores sender's credential information and email data in untracked `.json` files -- `sender-info.json`,  `email-info.json`, and `text-replacements.json` in the `data/` folder. Templates for those files have been provided in this repo as `sender-info-template.json`, `email-info-template.json`, `text-replacements-template.json`. You can either rename these files after cloning or make new ones with the required info.
+
+---
+
+### Main Scripts
 
 `send_email.py`:
 
 Usage:
 ```bash
-usage: send_email.py [-h] -r RECIPIENT_EMAIL
+usage: send_email.py [-h] -r RECIPIENT_EMAIL [-l LOGGING_LEVEL]
 
 Sends email based on the given email info and the sender's info to a recipient.
 
@@ -29,14 +33,19 @@ optional arguments:
   -h, --help            show this help message and exit
   -r RECIPIENT_EMAIL, --recipient_email RECIPIENT_EMAIL
                         Recipient's email address.
+  -l LOGGING_LEVEL, --logging-level LOGGING_LEVEL
+                        Logging level: DEBUG or INFO.
 ```
-This script parses through the email template and sends an email to the specified recipient address.
+This script parses through the email template, performs the given text replacements, and sends an email to the 
+specified recipient address. Note that logging level = `INFO` if not provided.
+
+---
 
 `send_multiple_emails.py`:
 
 Usage:
 ```bash
-usage: send_multiple_emails.py [-h] -r RECIPIENTS_FILE [-v VOLUNTEER]
+usage: send_multiple_emails.py [-h] -r RECIPIENTS_FILE [-v VOLUNTEER] [-l LOGGING_LEVEL]
 
 Send emails to multiple recipients based on a template.
 
@@ -46,8 +55,11 @@ optional arguments:
                         A document containing a list of emails and names of recipients. Currently supporting .csv files.
   -v VOLUNTEER, --volunteer VOLUNTEER
                         Name of person responsible for group of recipients in the data.
+  -l LOGGING_LEVEL, --logging-level LOGGING_LEVEL
+                        Logging level: DEBUG or INFO.
 ```
-This script sends multiple emails to recipients who are assigned to one volunteer.
+This script sends multiple emails to recipients who are assigned to a volunteer. This configuration/setting/structure was
+borne out of the need (or should I say, want) for automating emails to university alumni.
 
 The data file (`.csv`) containing email addresses of recipients assigned to volunteers can look like:
 
@@ -56,19 +68,24 @@ The data file (`.csv`) containing email addresses of recipients assigned to volu
 | Mustafa               | jondoe@u.rochester.edu | Jon |
 | Somebody              | hbull@yahoo.com        | Hasbullah |
 
+---
+
+### Data files
+
 `sender-info.json`:
 
-Stores the sender's name, email, class year, and app password in order to send emails (currently through Gmail but one can edit that as required). All fields in the file are strings. See [creating an app password with Gmail](https://support.google.com/accounts/answer/185833?visit_id=638125354060183902-2645876164&p=InvalidSecondFactor&rd=1).
+Stores the sender's name, email, and app password in order to send emails (currently through Gmail but one can edit that as required). All fields in the file are strings. See [creating an app password with Gmail](https://support.google.com/accounts/answer/185833?visit_id=638125354060183902-2645876164&p=InvalidSecondFactor&rd=1).
 
 Sample `sender-info.json`:
 ```json
 {
     "name": "Mr. Spira",
-    "class-year": "2022",
     "email": "spira@gmail.com",
     "app-password": "ibwopkpojojwq"
 }
 ```
+
+---
 
 `email-info.json`:
 
@@ -82,9 +99,41 @@ Sample `email-info.json`:
 }
 ```
 
+---
 
-## Next Steps:
-- [x] Make `requirements.txt` for module dependencies
-- [x] Add logger for logging
-- [x] Create helper scripts to generate `.json` files
-- [x] Make text replacements generic/editable by the user
+`text-replacements.json`
+
+Stores the text replacements you want to perform on the email template. An example of why you'd want this is shown below.
+Consider this email template:
+
+```
+Hello,
+
+Hope you're doing well...bla...bla...bla...
+
+Best,
+[Sender Name]
+[Job Title]
+```
+
+You want to replace `[Sender Name]` & `[Job Title]` with your name and job title. For this particular case, you 
+can do that by adding this `text-replacements.json`:
+
+```json
+{
+  "[Sender Name]": "Bahadur Ali",
+  "[Job Title]": "Free soul"
+}
+```
+
+**Note**: Since the email template is an html doc, you'd want the text to be replaced to be set accordingly. If the text 
+to be replaced is in red color but you want the replaced text to not be of that color, you'd want to add the whole html 
+style brackets -- templates converted from MS Word will work with this easily. See `data/text-replacements-template.json` 
+for an example.
+
+**Note**: If there are no text replacements to be made, an empty `text-replacements.json` will look like:
+
+```json
+{
+}
+```
