@@ -2,9 +2,9 @@
 
 Automate emails given a template!
 
-Send emails to recipient(s) 
+Send emails to recipient(s) by using an email template of your choice while also making text substitutions.
 
-# Set Up:
+## Set Up:
 Use `pip` to install required module(s). Simply run:
 ```bash
 pip3 install -r requirements.txt
@@ -66,7 +66,13 @@ The data file (`.csv`) containing email addresses of recipients assigned to volu
 | Volunteer assignment  | Email                  | Name |
 | -------------         | -------------          | ------------- |
 | Mustafa               | jondoe@u.rochester.edu | Jon |
+| Mustafa               | mysteriousman@gmail.com| Mr. M |
 | Somebody              | hbull@yahoo.com        | Hasbullah |
+
+An example usage of the script can look like:
+```bash
+./send_multiple_emails.py -r data/recipients.csv -v Mustafa
+```
 
 ---
 
