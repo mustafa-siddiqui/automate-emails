@@ -4,5 +4,6 @@ sender-info.json
 email-info.json
 *.html
 *.csv
+*.log
 .vscode/
 __pycache__/
