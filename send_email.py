@@ -130,8 +130,31 @@ def get_text_replacements(text_replacements_file: str) -> List:
     along with the replacement text. Returns None if no replacements are found."""
 
     file = open(text_replacements_file, "r")
-    text_replacements_json_obj = json.load(file)
+    exception_occurred = False
+    try:
+        text_replacements_json_obj = json.load(file)
+    except json.decoder.JSONDecodeError as error:
+        exception_occurred = True
+        logging.error(
+            f"Error occurred during reading text-replacements.json {{{error}}}"
+        )
     file.close()
+
+    if exception_occurred == True:
+        logging.info(
+            "Could not read text replacement json file. Text replacements will not be performed."
+        )
+        while True:
+            user_choice = input("Do you want to continue? [y/n] ")
+            if user_choice.lower() not in ("y", "n"):
+                print("Invalid option.", end=" ")
+            else:
+                break
+
+        if user_choice == "n":
+            exit(exception_occurred)
+        else:
+            return None
 
     text_replacements = []
     for key in text_replacements_json_obj:
