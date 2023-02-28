@@ -274,6 +274,7 @@ def main(args):
     logging.info("Connected to SMPT server successfully.")
 
     send_email(smtp_server, sender_info, email_info, recipient_email)
+    logging.info("Email sent.")
 
     disconnect_from_smtp_server(smtp_server)
     logging.info("Successfully disconnected from SMTP server. Exiting...")
