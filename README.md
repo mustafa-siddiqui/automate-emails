@@ -21,7 +21,7 @@ There are also helper scripts in `helpers` folder that you can run to create `se
 files. Make sure to run these scripts where you want to create the `json` files (i.e. inside the `data/` folder).
 
 An example usage from `data/` folder:
-```bash
+```
 python3 ../helpers/create-email-info-json.py -s "Test email" -f data/email-template.html
 ```
 
@@ -32,7 +32,7 @@ python3 ../helpers/create-email-info-json.py -s "Test email" -f data/email-templ
 `send_email.py`:
 
 Usage:
-```bash
+```
 usage: send_email.py [-h] -r RECIPIENT_EMAIL [-l LOGGING_LEVEL]
 
 Sends email based on the given email info and the sender's info to a recipient.
@@ -52,7 +52,7 @@ specified recipient address. Note that logging level = `INFO` if not provided.
 `send_multiple_emails.py`:
 
 Usage:
-```bash
+```
 usage: send_multiple_emails.py [-h] -r RECIPIENTS_FILE [-v VOLUNTEER] [-l LOGGING_LEVEL]
 
 Send emails to multiple recipients based on a template.
@@ -78,7 +78,7 @@ The data file (`.csv`) containing email addresses of recipients assigned to volu
 | Somebody              | hbull@yahoo.com        | Hasbullah |
 
 An example usage of the script can look like:
-```bash
+```
 ./send_multiple_emails.py -r data/recipients.csv -v Mustafa
 ```
 
