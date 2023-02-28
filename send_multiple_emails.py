@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 
+"""
+@file   send_multiple_emails.py
+@brief  Send emails to multiple recipients given a template while performing text substutions. 
+        Emails can also only be sent when assigned to a volunteer.
+@author Mustafa Siddiqui
+@copyright (c) 2023
+"""
+
 import argparse
 import logging
 import send_email

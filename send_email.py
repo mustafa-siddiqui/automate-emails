@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+@file   send_email.py
+@brief  Send email to recipient given a template while performing text substutions.
+@author Mustafa Siddiqui
+@copyright (c) 2023
+"""
+
 import argparse
 import json
 import logging
@@ -270,13 +277,17 @@ def send_email(
     message.attach(email_body_text)
 
     logging.debug(f"Sending email to {recipient_email}...")
+    exception_occurred = False
     try:
         smtp_server_obj.sendmail(
             sender_info.email, recipient_email, message.as_string()
         )
     except smtplib.SMTPException as error:
+        exception_occurred = True
         logging.error(f"Cannot send email: {{{error.strerror}}}")
-    logging.debug(f"Email successfully sent to {recipient_email}...")
+
+    if exception_occurred == False:
+        logging.debug(f"Email successfully sent to {recipient_email}...")
 
 
 #
@@ -307,13 +318,10 @@ def main(args):
 
     args = parser.parse_args(args)
 
-    logging_level = logging.INFO
     if args.logging_level == "DEBUG":
         logging_level = logging.DEBUG
-    elif args.logging_level == "INFO":
-        pass
-    elif args.logging_level is None:
-        pass
+    elif args.logging_level == "INFO" or args.logging_level is None:
+        logging_level = logging.INFO
     else:
         print("Error: Incorrect logging level. Valid options are INFO or DEBUG.")
         return
