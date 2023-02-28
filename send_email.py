@@ -3,6 +3,7 @@
 import argparse
 import json
 import logging
+from typing import List
 import re
 import smtplib
 import sys
@@ -28,22 +29,46 @@ SENDER_INFO_JSON_FILE = "data/sender-info.json"
 # email info json file path respective to this file
 EMAIL_INFO_JSON_FILE = "data/email-info.json"
 
-# text to find in template and replace with sender info
-REPLACE_WITH_NAME_MATCHER = "[<span style='color:red'>Sender name</span>]"
-REPLACE_WITH_CLASS_YEAR_MATCHER = "[<span style='color:red'>Year</span>]"
+# text replacements json file path respective to this file
+TEXT_REPLACEMENTS_JSON_FILE = "data/text-replacements.json"
 
 #
 # Classes
 #
 
 
+class TextReplacement:
+    """Class to store a single entry of text to be replaced along with text to replace with."""
+
+    def __init__(self, text_to_replace: str, replacement: str) -> None:
+        """Class constructor."""
+
+        self.text_to_replace = text_to_replace
+        self.replacement = replacement
+
+    def __str__(self) -> str:
+        """Returns a string representation of the object."""
+
+        str_repr = ""
+        str_repr += "{Text to replace: " + self.text_to_replace + ", "
+        str_repr += "Replacement: " + self.replacement + "}"
+
+        return str_repr
+
+    def get_text_to_replace(self):
+        """Get method to obtain text to be replaced."""
+        return self.text_to_replace
+
+    def get_replacement(self):
+        """Get method to obtain replacement."""
+        return self.replacement
+
+
 class EmailInfo:
     """Class to store email subject and body text."""
 
     def __init__(self, email_info_json_obj: dict) -> None:
-        """Class constructor.
-        subject: str
-        body: str"""
+        """Class constructor."""
 
         self.subject = email_info_json_obj["subject"]
         filepath = email_info_json_obj["body-template-file"]
@@ -67,13 +92,11 @@ class SenderInfo:
     def __init__(self, sender_info_json_obj: dict) -> None:
         """Class constructor.
         name: str
-        class_year: str
         email: str
         app_password: str
         """
 
         self.name = sender_info_json_obj["name"]
-        self.class_year = sender_info_json_obj["class-year"]
         self.email = sender_info_json_obj["email"]
         self.app_password = sender_info_json_obj["app-password"]
 
@@ -82,7 +105,6 @@ class SenderInfo:
 
         str_repr = ""
         str_repr += "{Name: " + self.name + ", "
-        str_repr += "Class Year: " + self.class_year + ", "
         str_repr += "Email: " + self.email + "}"
 
         return str_repr
@@ -103,6 +125,21 @@ def _validate_email(email: str) -> bool:
     return True
 
 
+def get_text_replacements(text_replacements_file: str) -> List:
+    """Get a list of TextReplacement objects storing the text that needs to be replaced
+    along with the replacement text."""
+
+    file = open(text_replacements_file, "r")
+    text_replacements_json_obj = json.load(file)
+    file.close()
+
+    text_replacements = []
+    for key in text_replacements_json_obj:
+        text_replacements.append(TextReplacement(key, text_replacements_json_obj[key]))
+
+    return text_replacements
+
+
 def get_sender_info(sender_info_file: str) -> SenderInfo:
     """Reads sender info json file, validates email address, and returns a SenderInfo object.
     Returns None if email not valid."""
@@ -117,23 +154,30 @@ def get_sender_info(sender_info_file: str) -> SenderInfo:
     return SenderInfo(sender_info)
 
 
-def _parse_email_template(template_html_text: str, sender_info: SenderInfo) -> str:
+def _parse_email_template(
+    template_html_text: str, sender_info: SenderInfo, text_replacements: List
+) -> str:
     """Helper function that parses through the email's body in HTML format and returns a string representation
-    containing the sender's name and class year."""
+    containing the text with text replacements done."""
 
-    template_modified = template_html_text.replace(
-        REPLACE_WITH_NAME_MATCHER, sender_info.name
-    )
-    email_body_html_text = template_modified.replace(
-        REPLACE_WITH_CLASS_YEAR_MATCHER, sender_info.class_year
-    )
+    for obj in text_replacements:
+        if obj.get_text_to_replace() in template_html_text:
+            template_html_text = template_html_text.replace(
+                obj.get_text_to_replace(), obj.get_replacement()
+            )
+        else:
+            logging.info(
+                f"Text to replace [{obj.get_text_to_replace()}] not found in template."
+            )
 
     logging.debug("Text replacements done...")
 
-    return email_body_html_text
+    return template_html_text
 
 
-def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
+def get_email_info(
+    email_info_file: str, sender_info: SenderInfo, text_replacements: List
+) -> EmailInfo:
     """Reads email info json file and returns a EmailInfo object with matchers replaced with sender's info."""
 
     file = open(email_info_file, "r")
@@ -141,7 +185,9 @@ def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
     file.close()
 
     email_info_obj = EmailInfo(email_info)
-    email_info_obj.body = _parse_email_template(email_info_obj.body, sender_info)
+    email_info_obj.body = _parse_email_template(
+        email_info_obj.body, sender_info, text_replacements
+    )
 
     logging.debug("Data extracted from email-info.json...")
 
@@ -263,7 +309,9 @@ def main(args):
         logging.error("Sender email not valid. Check sender-info.json")
         exit()
 
-    email_info = get_email_info(EMAIL_INFO_JSON_FILE, sender_info)
+    text_replacements = get_text_replacements(TEXT_REPLACEMENTS_JSON_FILE)
+
+    email_info = get_email_info(EMAIL_INFO_JSON_FILE, sender_info, text_replacements)
 
     logging.info("All data validated.")
 
