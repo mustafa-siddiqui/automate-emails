@@ -29,7 +29,7 @@ python3 ../helpers/create-email-info-json.py -s "Test email" -f data/email-templ
 
 ### Main Scripts
 
-> `send_email.py`:
+<u>`send_email.py`</u>:
 
 Usage:
 ```
@@ -47,7 +47,7 @@ optional arguments:
 This script parses through the email template, performs the given text replacements, and sends an email to the 
 specified recipient address. Note that logging level = `INFO` if not provided.
 
-> `send_multiple_emails.py`:
+<u>`send_multiple_emails.py`</u>:
 
 Usage:
 ```
@@ -84,7 +84,7 @@ An example usage of the script can look like:
 
 ### Data files
 
-> `sender-info.json`:
+<u>`sender-info.json`</u>:
 
 Stores the sender's name, email, and app password in order to send emails (currently through Gmail but one can edit that as required). All fields in the file are strings. See [creating an app password with Gmail](https://support.google.com/accounts/answer/185833?visit_id=638125354060183902-2645876164&p=InvalidSecondFactor&rd=1).
 
@@ -97,7 +97,7 @@ Sample `sender-info.json`:
 }
 ```
 
-> `email-info.json`:
+<u>`email-info.json`</u>:
 
 Stores the email subject and body. The body is the filepath to a `.html` file containing the email text body. It is `.html` so that rich formatting can be supported. Write your email as you wish in MS Word or Google Docs and save it as a `.html` file. All fields in this file are strings.
 
@@ -109,7 +109,7 @@ Sample `email-info.json`:
 }
 ```
 
-> `text-replacements.json`
+<u>`text-replacements.json`</u>:
 
 Stores the text replacements you want to perform on the email template. An example of why you'd want this is shown below.
 Consider this email template:
