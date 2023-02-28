@@ -20,6 +20,11 @@ This repo stores sender's credential information and email data in untracked `.j
 There are also helper scripts in `helpers` folder that you can run to create `sender-info.json` and `email-info.json` 
 files. Make sure to run these scripts where you want to create the `json` files (i.e. inside the `data/` folder).
 
+An example usage from `data/` folder:
+```bash
+python3 ../helpers/create-email-info-json.py -s "Test email" -f data/email-template.html
+```
+
 ---
 
 ### Main Scripts
