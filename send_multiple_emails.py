@@ -50,7 +50,7 @@ def main():
         required=False,
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args()
 
     logging_level = logging.INFO
     if args.logging_level == "DEBUG":
@@ -64,6 +64,7 @@ def main():
         return
 
     logging.basicConfig(
+        filename="emails.log",
         level=logging_level,
         format="[%(asctime)s]: [%(levelname)s]: %(message)s",
         datefmt="%Y-%m-%d - %H:%M:%S",
@@ -76,10 +77,12 @@ def main():
 
     # Send emails to recipients assigned to volunteer if specified
     # If not, send to all one by one
+    volunteer_matches = 0
     for recipient in recipients:
         recipient_email = recipient["Email"]
         if args.volunteer is not None:
             if recipient["Volunteer assignment"] == args.volunteer:
+                volunteer_matches += 1
                 logging.info(
                     f"Sending email to {recipient['Name']} @ {recipient['Email']}..."
                 )
@@ -91,6 +94,9 @@ def main():
                 f"Sending email to {recipient['Name']} @ {recipient['Email']}..."
             )
             send_email.main(["-r", recipient_email])
+
+    if args.volunteer is not None and volunteer_matches == 0:
+        logging.error(f"No volunteer with name [{args.volunteer}] found.")
 
 
 if __name__ == "__main__":
