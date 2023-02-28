@@ -277,7 +277,7 @@ def main(args):
     logging.info("Email sent.")
 
     disconnect_from_smtp_server(smtp_server)
-    logging.info("Successfully disconnected from SMTP server. Exiting...")
+    logging.info("Successfully disconnected from SMTP server.")
 
 
 if __name__ == "__main__":
