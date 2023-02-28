@@ -2,6 +2,7 @@
 !requirements.txt
 sender-info.json
 email-info.json
+text-replacements.json
 *.html
 *.csv
 *.log
