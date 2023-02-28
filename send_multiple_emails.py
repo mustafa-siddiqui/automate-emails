@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
+
 import argparse
+import logging
 import send_email
 import csv
 
@@ -39,9 +42,37 @@ def main():
         required=False,
     )
 
-    args = parser.parse_args()
+    parser.add_argument(
+        "-l",
+        "--logging-level",
+        help="""Logging level: DEBUG or INFO.""",
+        type=str,
+        required=False,
+    )
+
+    args = parser.parse_args(args)
+
+    logging_level = logging.INFO
+    if args.logging_level == "DEBUG":
+        logging_level = logging.DEBUG
+    elif args.logging_level == "INFO":
+        pass
+    elif args.logging_level is None:
+        pass
+    else:
+        print("Error: Incorrect logging level. Valid options are INFO or DEBUG.")
+        return
+
+    logging.basicConfig(
+        level=logging_level,
+        format="[%(asctime)s]: [%(levelname)s]: %(message)s",
+        datefmt="%Y-%m-%d - %H:%M:%S",
+    )
 
     recipients = _get_list_of_dict(args.recipients_file)
+    if len(recipients) == 0:
+        logging.error("No recipients found after reading .csv file.")
+        return
 
     # Send emails to recipients assigned to volunteer if specified
     # If not, send to all one by one
@@ -49,12 +80,16 @@ def main():
         recipient_email = recipient["Email"]
         if args.volunteer is not None:
             if recipient["Volunteer assignment"] == args.volunteer:
-                print(f"Sending email to {recipient['Name']} @ {recipient['Email']}...")
+                logging.info(
+                    f"Sending email to {recipient['Name']} @ {recipient['Email']}..."
+                )
                 send_email.main(["-r", recipient_email])
             else:
                 pass
         else:
-            print(f"Sending email to {recipient['Name']} @ {recipient['Email']}...")
+            logging.info(
+                f"Sending email to {recipient['Name']} @ {recipient['Email']}..."
+            )
             send_email.main(["-r", recipient_email])
 
 

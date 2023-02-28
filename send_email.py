@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import argparse
 import json
+import logging
 import re
 import smtplib
 import sys
@@ -114,11 +117,6 @@ def get_sender_info(sender_info_file: str) -> SenderInfo:
     return SenderInfo(sender_info)
 
 
-def read_data_file(data_file: str) -> dict:
-    """Parses through .csv data file and creates a dictionary of recipients' names with their
-    email addresses."""
-
-
 def _parse_email_template(template_html_text: str, sender_info: SenderInfo) -> str:
     """Helper function that parses through the email's body in HTML format and returns a string representation
     containing the sender's name and class year."""
@@ -129,6 +127,8 @@ def _parse_email_template(template_html_text: str, sender_info: SenderInfo) -> s
     email_body_html_text = template_modified.replace(
         REPLACE_WITH_CLASS_YEAR_MATCHER, sender_info.class_year
     )
+
+    logging.debug("Text replacements done...")
 
     return email_body_html_text
 
@@ -143,6 +143,8 @@ def get_email_info(email_info_file: str, sender_info: SenderInfo) -> EmailInfo:
     email_info_obj = EmailInfo(email_info)
     email_info_obj.body = _parse_email_template(email_info_obj.body, sender_info)
 
+    logging.debug("Data extracted from email-info.json...")
+
     return email_info_obj
 
 
@@ -154,7 +156,7 @@ def connect_to_smtp_server(sender_info: SenderInfo) -> smtplib.SMTP:
     try:
         smtp_server_obj = smtplib.SMTP(SMTP_SERVER_DOMAIN_NAME, SMTP_SERVER_PORT)
     except OSError as error:
-        print("Error: Cannot connect to SMTP server. {" + str(error) + "}")
+        logging.error(f"Cannot connect to SMTP server. {{{error.strerror}}}")
         return None
 
     smtp_server_obj.starttls()
@@ -163,10 +165,8 @@ def connect_to_smtp_server(sender_info: SenderInfo) -> smtplib.SMTP:
     try:
         smtp_server_obj.login(sender_info.email, sender_info.app_password)
     except smtplib.SMTPAuthenticationError as error:
-        print(
-            "Error: cannot login to SMPT server. Check your login credentials. {"
-            + str(error)
-            + "}"
+        logging.error(
+            f"Cannot login to SMTP server. Check your login credentials. {{{error.strerror}}}"
         )
         return None
 
@@ -197,7 +197,14 @@ def send_email(
     email_body_text = MIMEText(email_info.body, "html")
     message.attach(email_body_text)
 
-    smtp_server_obj.sendmail(sender_info.email, recipient_email, message.as_string())
+    logging.debug(f"Sending email to {recipient_email}...")
+    try:
+        smtp_server_obj.sendmail(
+            sender_info.email, recipient_email, message.as_string()
+        )
+    except smtplib.SMTPException as error:
+        logging.error(f"Cannot send email: {{{error.strerror}}}")
+    logging.debug(f"Email successfully sent to {recipient_email}...")
 
 
 #
@@ -218,29 +225,58 @@ def main(args):
         required=True,
     )
 
+    parser.add_argument(
+        "-l",
+        "--logging-level",
+        help="""Logging level: DEBUG or INFO.""",
+        type=str,
+        required=False,
+    )
+
     args = parser.parse_args(args)
 
+    logging_level = logging.INFO
+    if args.logging_level == "DEBUG":
+        logging_level = logging.DEBUG
+    elif args.logging_level == "INFO":
+        pass
+    elif args.logging_level is None:
+        pass
+    else:
+        print("Error: Incorrect logging level. Valid options are INFO or DEBUG.")
+        return
+
+    logging.basicConfig(
+        level=logging_level,
+        format="[%(asctime)s]: [%(levelname)s]: %(message)s",
+        datefmt="%Y-%m-%d - %H:%M:%S",
+    )
+
     if not _validate_email(args.recipient_email):
-        print("Error: Invalid email address for recipient.")
+        logging.error("Invalid email address for recipient.")
         exit()
 
     recipient_email = args.recipient_email
 
     sender_info = get_sender_info(SENDER_INFO_JSON_FILE)
     if sender_info is None:
-        print("Error: sender email not valid. Check sender-info.json")
+        logging.error("Sender email not valid. Check sender-info.json")
         exit()
 
     email_info = get_email_info(EMAIL_INFO_JSON_FILE, sender_info)
 
+    logging.info("All data validated.")
+
     smtp_server = connect_to_smtp_server(sender_info)
     if smtp_server is None:
-        print("Error: cannot connect to SMTP server.")
+        logging.error("Cannot connect to SMTP server.")
         exit()
+    logging.info("Connected to SMPT server successfully.")
 
     send_email(smtp_server, sender_info, email_info, recipient_email)
 
     disconnect_from_smtp_server(smtp_server)
+    logging.info("Successfully disconnected from SMTP server. Exiting...")
 
 
 if __name__ == "__main__":
