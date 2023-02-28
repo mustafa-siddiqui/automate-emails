@@ -127,7 +127,7 @@ def _validate_email(email: str) -> bool:
 
 def get_text_replacements(text_replacements_file: str) -> List:
     """Get a list of TextReplacement objects storing the text that needs to be replaced
-    along with the replacement text."""
+    along with the replacement text. Returns None if no replacements are found."""
 
     file = open(text_replacements_file, "r")
     text_replacements_json_obj = json.load(file)
@@ -136,6 +136,10 @@ def get_text_replacements(text_replacements_file: str) -> List:
     text_replacements = []
     for key in text_replacements_json_obj:
         text_replacements.append(TextReplacement(key, text_replacements_json_obj[key]))
+
+    if len(text_replacements) == 0:
+        logging.info("No text replacements found.")
+        return None
 
     return text_replacements
 
@@ -154,11 +158,12 @@ def get_sender_info(sender_info_file: str) -> SenderInfo:
     return SenderInfo(sender_info)
 
 
-def _parse_email_template(
-    template_html_text: str, sender_info: SenderInfo, text_replacements: List
-) -> str:
+def _parse_email_template(template_html_text: str, text_replacements: List) -> str:
     """Helper function that parses through the email's body in HTML format and returns a string representation
     containing the text with text replacements done."""
+
+    if text_replacements is None:
+        return template_html_text
 
     for obj in text_replacements:
         if obj.get_text_to_replace() in template_html_text:
@@ -178,16 +183,14 @@ def _parse_email_template(
 def get_email_info(
     email_info_file: str, sender_info: SenderInfo, text_replacements: List
 ) -> EmailInfo:
-    """Reads email info json file and returns a EmailInfo object with matchers replaced with sender's info."""
+    """Reads email info json file and returns a EmailInfo object with text replacements."""
 
     file = open(email_info_file, "r")
     email_info = json.load(file)
     file.close()
 
     email_info_obj = EmailInfo(email_info)
-    email_info_obj.body = _parse_email_template(
-        email_info_obj.body, sender_info, text_replacements
-    )
+    email_info_obj.body = _parse_email_template(email_info_obj.body, text_replacements)
 
     logging.debug("Data extracted from email-info.json...")
 
