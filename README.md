@@ -67,7 +67,7 @@ optional arguments:
                         Logging level: DEBUG or INFO.
 ```
 This script sends multiple emails to recipients who are assigned to a volunteer. This configuration/setting/structure was
-borne out of the need (or should I say, want) for automating emails to university alumni.
+born out of the need (or should I say, want) for automating emails to university alumni.
 
 The data file (`.csv`) containing email addresses of recipients assigned to volunteers can look like:
 
