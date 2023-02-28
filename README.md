@@ -17,6 +17,9 @@ pip3 install -r requirements.txt
 
 This repo stores sender's credential information and email data in untracked `.json` files -- `sender-info.json`,  `email-info.json`, and `text-replacements.json` in the `data/` folder. Templates for those files have been provided in this repo as `sender-info-template.json`, `email-info-template.json`, `text-replacements-template.json`. You can either rename these files after cloning or make new ones with the required info.
 
+There are also helper scripts in `helpers` folder that you can run to create `sender-info.json` and `email-info.json` 
+files. Make sure to run these scripts where you want to create the `json` files (i.e. inside the `data/` folder).
+
 ---
 
 ### Main Scripts
