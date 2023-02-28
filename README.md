@@ -87,4 +87,4 @@ Sample `email-info.json`:
 - [x] Make `requirements.txt` for module dependencies
 - [x] Add logger for logging
 - [x] Create helper scripts to generate `.json` files
-- [ ] Make text replacements generic/editable by the user
+- [x] Make text replacements generic/editable by the user
